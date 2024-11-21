@@ -8,6 +8,16 @@ function App() {
     process.env.REACT_APP_API_GATEWAY_ENDPOINT;
   const env: string | undefined = process.env.REACT_APP_ENV;
 
+  interface Dog {
+    name: string;
+    age: number;
+  }
+  let obj: Dog = {
+    name: "muzzi",
+    age: 3,
+  };
+  console.log(obj);
+
   const test_funcs = {
     test_front_env: () => {
       const dog: string | undefined = process.env.REACT_APP_DOG;
@@ -26,7 +36,22 @@ function App() {
       }
     },
     test_connect_to_lambda: () => {
-      fetch(`${endpoint}/test`)
+      fetch(`${endpoint}/test?request=connectLambda`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          alert(data.message);
+        })
+        .catch((error) => {
+          alert("Error connecting to Lambda: " + JSON.stringify(error));
+        });
+    },
+    test_connect_to_db: () => {
+      fetch(`${endpoint}/test?request=connectDb`)
         .then((response) => {
           if (!response.ok) {
             throw new Error("Network response was not ok");
@@ -101,6 +126,21 @@ function App() {
               <p className="test_ds_detail">
                 test 람다랑 통신 테스트 / hello test from test lambda가 뜨면
                 성공!
+              </p>
+            </div>
+          </div>
+
+          <div className="row border shadow">
+            <button
+              className="test_btn btn btn-primary"
+              onClick={test_funcs.test_connect_to_db}
+            >
+              TEST
+            </button>
+            <div className="test_description">
+              <h6 className="test_ds_title">db 통신 test</h6>
+              <p className="test_ds_detail">
+                test db 통신 테스트 / 컬렉션 리스트가 보이면 성공!
               </p>
             </div>
           </div>
