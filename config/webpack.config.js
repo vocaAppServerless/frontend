@@ -340,13 +340,6 @@ module.exports = function (webpackEnv) {
     module: {
       strictExportPresence: true,
       rules: [
-        {
-          test: /\.css$/,
-          use: [
-            MiniCssExtractPlugin.loader, // CSS를 별도의 파일로 추출
-            "css-loader", // CSS 파일을 JavaScript로 처리
-          ],
-        },
         // Handle node_modules packages that contain sourcemaps
         shouldUseSourceMap && {
           enforce: "pre",
@@ -755,9 +748,6 @@ module.exports = function (webpackEnv) {
             },
           },
         }),
-      new MiniCssExtractPlugin({
-        filename: "[name].[contenthash].css", // 해시를 포함한 파일명으로 분리
-      }),
     ].filter(Boolean),
     // Turn off performance processing because we utilize
     // our own hints via the FileSizeReporter
