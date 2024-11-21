@@ -113,9 +113,7 @@ function App() {
             <div className="test_description">
               <h6 className="test_ds_title">S3환경변수 endpoint 읽기 test</h6>
               <p className="test_ds_detail">
-                'available to read endpoint'가 출력되면 성공! *꼭 환경변수에
-                REACT_APP_접두사를 붙여줘야합니다.
-                REACT_APP_API_GATEWAY_ENDPOINT
+                'available to read endpoint'가 출력되면 성공!
               </p>
             </div>
           </div>
