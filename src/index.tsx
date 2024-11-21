@@ -1,9 +1,9 @@
-import "bootstrap/dist/css/bootstrap.min.css"; // Bootstrap CSS 임포트
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
+import "./index.css"; // Tailwind을 사용할 CSS 파일
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
