@@ -20,17 +20,17 @@ function App() {
   return (
     <Router>
       <div className="App">
+        <nav>
+          <ul>
+            <li>
+              <Link to="/">Home</Link>
+            </li>
+            <li>
+              <Link to="/about">About</Link>
+            </li>
+          </ul>
+        </nav>
         <div className="container_app">
-          <nav>
-            <ul>
-              <li>
-                <Link to="/">Home</Link>
-              </li>
-              <li>
-                <Link to="/about">About</Link>
-              </li>
-            </ul>
-          </nav>
           <h1>Hello, Remember me project!</h1>
           {message && <div>{message}</div>}
           <p>{env}</p>

@@ -48,10 +48,10 @@ const TestZone: React.FC<TestZoneProps> = ({ endpoint }) => {
             return response.json();
           })
           .then((data) => {
-            alert(data.message);
+            alert(data.collections);
           })
           .catch((error) => {
-            alert("Error connecting to Lambda: " + JSON.stringify(error));
+            alert("Error connecting to db: " + JSON.stringify(error));
           });
       }
     },
