@@ -3,7 +3,6 @@ import "./App.css";
 
 function App() {
   const [message, setMessage] = useState<string>("");
-
   const endpoint: string | undefined =
     process.env.REACT_APP_API_GATEWAY_ENDPOINT;
   const env: string | undefined = process.env.REACT_APP_ENV;
@@ -12,6 +11,7 @@ function App() {
     name: string;
     age: number;
   }
+
   let obj: Dog = {
     name: "muzzi",
     age: 3,
@@ -32,7 +32,7 @@ function App() {
       if (endpoint) {
         alert("available to read endpoint.");
       } else {
-        alert("api gateway endpoint environment variable is not set.");
+        alert("API Gateway endpoint environment variable is not set.");
       }
     },
     test_connect_to_lambda: () => {
@@ -67,20 +67,25 @@ function App() {
     },
   };
 
+  useEffect(() => {
+    // 예시로 메시지를 세팅하는 부분
+    setMessage("Welcome to the app!");
+  }, []);
+
   return (
     <div className="App">
       <div className="container_app">
-        <h1>hello Remember me project!</h1>
+        <h1>Hello, Remember me project!</h1>
         {message && <div>{message}</div>}
         <p>{env}</p>
       </div>
 
-      {/* ----  test zone  ---- */}
+      {/* ---- Test Zone ---- */}
       <div className="test_zone_container border shadow">
         <h2 className="text-center mb-4">Infra Test Zone</h2>
 
-        {/* Buttons */}
         <div className="test_zone_div">
+          {/* Test Button for REACT_APP_DOG */}
           <div className="row border shadow">
             <button
               className="test_btn btn btn-primary"
@@ -97,6 +102,7 @@ function App() {
             </div>
           </div>
 
+          {/* Test Button for API Gateway Endpoint */}
           <div className="row border shadow">
             <button
               className="test_btn btn btn-primary"
@@ -114,6 +120,7 @@ function App() {
             </div>
           </div>
 
+          {/* Test Button for Lambda Connection */}
           <div className="row border shadow">
             <button
               className="test_btn btn btn-primary"
@@ -122,14 +129,15 @@ function App() {
               TEST
             </button>
             <div className="test_description">
-              <h6 className="test_ds_title">lambda 통신 test</h6>
+              <h6 className="test_ds_title">Lambda 통신 test</h6>
               <p className="test_ds_detail">
-                test 람다랑 통신 테스트 / hello test from test lambda가 뜨면
+                Test 람다랑 통신 테스트 / "Hello test from test lambda"가 뜨면
                 성공!
               </p>
             </div>
           </div>
 
+          {/* Test Button for DB Connection */}
           <div className="row border shadow">
             <button
               className="test_btn btn btn-primary"
@@ -138,32 +146,12 @@ function App() {
               TEST
             </button>
             <div className="test_description">
-              <h6 className="test_ds_title">db 통신 test</h6>
+              <h6 className="test_ds_title">DB 통신 test</h6>
               <p className="test_ds_detail">
-                test db 통신 테스트 / 컬렉션 리스트가 보이면 성공!
+                Test DB 통신 테스트 / 컬렉션 리스트가 보이면 성공!
               </p>
             </div>
           </div>
-
-          <div className="row border shadow disabled">
-            <button
-              className="test_btn btn btn-primary disabled-btn"
-              onClick={test_funcs.test_connect_to_lambda}
-            >
-              TEST
-            </button>
-            <div className="test_description">
-              <h6 className="test_ds_title">미구현 test</h6>
-              <p className="test_ds_detail">test</p>
-            </div>
-          </div>
-          {/* <button className="btn btn-secondary">Secondary</button>
-          <button className="btn btn-success">Success</button>
-          <button className="btn btn-danger">Danger</button>
-          <button className="btn btn-warning">Warning</button>
-          <button className="btn btn-info">Info</button>
-          <button className="btn btn-light">Light</button>
-          <button className="btn btn-dark">Dark</button> */}
         </div>
       </div>
     </div>
