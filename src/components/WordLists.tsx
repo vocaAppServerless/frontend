@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
+import { useSelector } from "react-redux";
 import { useFuncs } from "../funcs";
 
 const WordLists = () => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const { userInfo } = useSelector((state: any) => state);
   const funcs = useFuncs();
 

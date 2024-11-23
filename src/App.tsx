@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import "./App.scss";
 import { Provider } from "react-redux";
 import { store } from "./store";
@@ -15,44 +15,23 @@ import TestZone from "./components/TestZone";
 import Home from "./components/Home";
 import WordLists from "./components/WordLists";
 import Auth from "./components/Auth"; // Auth.tsx 컴포넌트 임포트
-import { auth } from "./auth";
 
 const About = () => <h2>About Page</h2>;
 
 const AppContent = () => {
-  const [message, setMessage] = useState<string>("");
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-
   const location = useLocation(); // useLocation은 Router 내부에서 사용 가능
 
   useEffect(() => {
     // 경로 변경 시 실행될 함수
     const handleRouteChange = () => {
       console.log(`Current Path: ${location.pathname}`);
-      setMessage(`You are now on: ${location.pathname}`);
     };
 
     handleRouteChange(); // 경로가 변경될 때마다 실행
   }, [location]);
 
-  const handleLoginClick = () => {
-    // 로그인 버튼 클릭 시 로그인 로직 구현
-    console.log("로그인 버튼 클릭");
-  };
-
-  useEffect(() => {
-    const accessToken = localStorage.getItem("access_token");
-
-    if (accessToken) {
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
-    }
-  }, []);
-
   const endpoint: string | undefined =
     process.env.REACT_APP_API_GATEWAY_ENDPOINT;
-  const env: string | undefined = process.env.REACT_APP_ENV;
 
   return (
     <Provider store={store}>
