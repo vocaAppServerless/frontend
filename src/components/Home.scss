@@ -1,0 +1,32 @@
+.container_home {
+  background-color: aqua;
+  text-align: center;
+  .google-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    background-color: white; // 구글 블루 색상
+    color: black;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 250px;
+    margin: 10px auto;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: #357ae8; // 버튼 hover시 색상 변화
+    }
+
+    .google-logo {
+      height: 20px;
+      margin-right: 10px;
+    }
+
+    span {
+      font-weight: 500;
+    }
+  }
+}
