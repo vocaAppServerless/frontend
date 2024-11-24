@@ -25,7 +25,7 @@ const Auth: React.FC = () => {
     };
 
     authenticateUser();
-  }, [dispatch]);
+  }, [dispatch, navigate]);
 
   return (
     <div>
