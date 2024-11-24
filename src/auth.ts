@@ -90,8 +90,8 @@ export const auth = {
         `state=state_parameter_passthrough_value&` +
         `code_challenge=${encodeURIComponent(codeChallenge)}&` +
         `code_challenge_method=S256&` +
-        `access_type=offline&` + // 리프레시 토큰 요청
-        `prompt=consent`; // 강제 동의 화면 표시
+        `access_type=offline&` +
+        `prompt=consent`;
 
       window.location.href = googleOauthUrl;
     } catch (error) {
@@ -137,4 +137,106 @@ export const auth = {
       throw error;
     }
   },
+  api: axios.create({
+    baseURL: api,
+    timeout: 5000, // 요청 타임아웃
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }),
 };
+
+//------------------- interceptors -----------------------
+
+// Request 인터셉터: 모든 요청에 access_token을 헤더에 추가
+auth.api.interceptors.request.use(
+  (config) => {
+    const accessToken = localStorage.getItem("access_token");
+    if (accessToken) {
+      config.headers["Access-Token"] = `Bearer ${accessToken}`;
+      config.headers["Content-Type"] = "application/json";
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response 인터셉터
+auth.api.interceptors.response.use(
+  (response) => {
+    // 응답 코드 200번이고 authResponse가 success authorization인 경우
+    if (
+      // response.status === 200 &&
+      response.data.authResponse === "success authorization"
+    ) {
+      // 로직 처리 (데이터 반환)
+      return response;
+    } else if (
+      // response.status === 201 &&
+      response.data.authResponse?.message === "here is new tokens"
+    ) {
+      const access_token = response.data.authResponse.access_token;
+      const refresh_token = response.data.authResponse.refresh_token;
+      localStorage.setItem("access_token", access_token);
+      localStorage.setItem("refresh_token", refresh_token);
+      return response;
+    } else {
+      console.log(response);
+      return response;
+    }
+  },
+  async (error) => {
+    const originalRequest = error.config;
+
+    // 응답 코드 419번, authResponse가 expired access token인 경우
+    if (
+      error.response?.status === 419 &&
+      error.response?.data.authResponse === "expired access token"
+    ) {
+      console.error("access is expired. retry request with refresh token");
+      const refreshToken = localStorage.getItem("refresh_token");
+
+      if (!refreshToken) {
+        console.error("there is not refresh token in local storage!");
+        return Promise.reject(error);
+      }
+
+      // refresh token을 헤더에 담아 새로 요청
+      try {
+        // 기존 요청의 데이터를 유지하며 refresh token만 헤더에 추가
+        delete originalRequest.headers["Access-Token"];
+        originalRequest.headers["Refresh-Token"] = `Bearer ${refreshToken}`;
+        originalRequest.headers["Content-Type"] = "application/json";
+
+        // 기존 요청을 그대로 재시도
+        const response = await axios(originalRequest);
+        // return response.data;
+        return response;
+      } catch (refreshError) {
+        alert("Error refreshing token:" + JSON.stringify(refreshError));
+        // Refresh 실패 시 로컬스토리지 및 상태 초기화
+        localStorage.clear();
+        return Promise.reject(refreshError);
+      }
+    }
+
+    if (error.response) {
+      if (error.response.status >= 500) {
+        // 500번대 오류 처리
+        console.error("API error:", error.message);
+      } else if (error.response.status >= 400 && error.response.status < 500) {
+        // 400번대 오류 처리
+        alert(
+          "Authorization Error" +
+            JSON.stringify(error.response?.data?.authResponse) ||
+            "Unknown error"
+        );
+        localStorage.clear();
+        window.location.href = "/";
+        return Promise.reject(error);
+      }
+    }
+  }
+);

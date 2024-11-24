@@ -1,4 +1,6 @@
 import React from "react";
+import { auth } from "../auth";
+import { AxiosError } from "axios";
 
 interface TestZoneProps {
   endpoint?: string;
@@ -78,6 +80,24 @@ const TestZone: React.FC<TestZoneProps> = ({ endpoint }) => {
           );
       }
     },
+    test_oauth_middle_ware: async () => {
+      if (endpoint) {
+        try {
+          const response = await auth.api.get(
+            `${endpoint}/test?request=testAuthFlow`
+          );
+
+          alert(JSON.stringify(response.data));
+        } catch (error) {
+          // error를 AxiosError 타입으로 지정하여 접근
+          const axiosError = error as AxiosError;
+          alert(
+            "Error connecting to DB: " +
+              JSON.stringify(axiosError.response?.data || axiosError.message)
+          );
+        }
+      }
+    },
   };
 
   return (
@@ -108,6 +128,11 @@ const TestZone: React.FC<TestZoneProps> = ({ endpoint }) => {
           onClick={test_funcs.test_connect_to_db}
           title="DB 통신 test"
           description="Test DB 통신 테스트 / 컬렉션 리스트가 보이면 성공!"
+        />{" "}
+        <TestButton
+          onClick={test_funcs.test_oauth_middle_ware}
+          title="인증 미들웨어 테스트"
+          description="인증 미들웨어 테스트 / 뭐가보일까?"
         />
       </div>
     </div>
