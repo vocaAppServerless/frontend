@@ -40,7 +40,7 @@ const Home = () => {
     <div className="container_home">
       <p>here is home!</p>
       <p>here is home!</p>
-      <p>{state.userInfo}</p>
+      <p>{JSON.stringify(state.userInfo)}</p>
 
       {/* 구글 로그인 버튼 */}
       {state.mode.loginButton && (

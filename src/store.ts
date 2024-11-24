@@ -8,7 +8,7 @@ const initialState = {
 
 const appReducer = (state = initialState, action: any) => {
   switch (action.type) {
-    case "SET_USER":
+    case "SET_USER_INFO":
       return { ...state, userInfo: action.value };
     case "SET_LOGIN_BUTTON":
       return {

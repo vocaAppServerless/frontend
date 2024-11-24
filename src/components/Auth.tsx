@@ -1,7 +1,11 @@
 import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { auth } from "../auth";
 
 const Auth: React.FC = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   useEffect(() => {
     const authenticateUser = async () => {
       try {
@@ -9,9 +13,11 @@ const Auth: React.FC = () => {
         const code = params.get("code");
 
         if (code) {
-          await auth.sign(code);
+          const userInfo = await auth.sign(code);
+          dispatch({ type: "SET_USER_INFO", value: userInfo });
+          navigate("/");
         } else {
-          window.location.href = "/";
+          navigate("/");
         }
       } catch (error: any) {
         alert("Authentication failed: " + error.message);
@@ -19,7 +25,7 @@ const Auth: React.FC = () => {
     };
 
     authenticateUser();
-  }, []);
+  }, [dispatch]);
 
   return (
     <div>
