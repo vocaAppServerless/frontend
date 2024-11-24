@@ -1,3 +1,5 @@
+//Home
+
 import React, { useEffect } from "react";
 import "./Home.scss";
 import { auth } from "../auth";
