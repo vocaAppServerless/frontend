@@ -146,7 +146,7 @@ export const auth = {
   }),
 };
 
-//------------------- interceptors -----------------------
+//------------------- interceptors ----------------------
 
 // Request 인터셉터: 모든 요청에 access_token을 헤더에 추가
 auth.api.interceptors.request.use(
