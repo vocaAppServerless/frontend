@@ -152,17 +152,27 @@ export const auth = {
 auth.api.interceptors.request.use(
   (config) => {
     const accessToken = localStorage.getItem("access_token");
+    const email = localStorage.getItem("email");
+
     if (accessToken) {
       config.headers["Access-Token"] = `Bearer ${accessToken}`;
       config.headers["Content-Type"] = "application/json";
     }
+
+    if (email) {
+      const encodedEmail = encodeURIComponent(email);
+      config.params = {
+        ...(config.params || {}), // 기존 파라미터 유지
+        email: encodedEmail, // email 추가
+      };
+    }
+
     return config;
   },
   (error) => {
     return Promise.reject(error);
   }
 );
-
 // Response 인터셉터
 auth.api.interceptors.response.use(
   (response) => {
@@ -177,10 +187,8 @@ auth.api.interceptors.response.use(
       // response.status === 201 &&
       response.data.authResponse?.message === "here is new tokens"
     ) {
-      const access_token = response.data.authResponse.access_token;
-      const refresh_token = response.data.authResponse.refresh_token;
+      const access_token = response.data.authResponse.tokens.access_token;
       localStorage.setItem("access_token", access_token);
-      localStorage.setItem("refresh_token", refresh_token);
       return response;
     } else {
       console.log(response);
