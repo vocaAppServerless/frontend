@@ -16,14 +16,13 @@
     transition: background-color 0.3s;
 
     &:hover {
-      background-color: #357ae8; // 버튼 hover시 색상 변화
+      background-color: #4285f4; // 버튼 hover시 색상 변화
     }
 
     .google-logo {
       height: 20px;
       margin-right: 10px;
     }
-
     span {
       font-weight: 500;
     }

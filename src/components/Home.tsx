@@ -48,7 +48,6 @@ const Home = () => {
       <p>here is home!</p>
       <p>{JSON.stringify(state.userInfo)}</p>
 
-      {/* 구글 로그인 버튼 */}
       {state.mode.loginButton && (
         <GoogleLoginButton
           onClick={() => {

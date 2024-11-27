@@ -119,7 +119,7 @@ export const auth = {
         }
       );
 
-      const { authResponse, userInfo, tokens } = response.data;
+      const { userInfo, tokens } = response.data;
 
       if (userInfo && tokens) {
         localStorage.setItem("access_token", tokens.access_token);
@@ -128,7 +128,6 @@ export const auth = {
         localStorage.setItem("picture", userInfo.picture);
 
         localStorage.removeItem("code_verifier");
-        console.log(authResponse);
 
         return userInfo;
       } else {
@@ -193,7 +192,6 @@ auth.api.interceptors.response.use(
       localStorage.setItem("access_token", access_token);
       return response;
     } else {
-      console.log(response);
       return response;
     }
   },
@@ -221,13 +219,13 @@ auth.api.interceptors.response.use(
         originalRequest.headers["Content-Type"] = "application/json";
 
         // 기존 요청을 그대로 재시도
-        const response = await axios(originalRequest);
+        const response = await auth.api(originalRequest);
         // return response.data;
         return response;
       } catch (refreshError) {
         alert("Error refreshing token:" + JSON.stringify(refreshError));
         // Refresh 실패 시 로컬스토리지 및 상태 초기화
-        localStorage.clear();
+        // localStorage.clear();
         return Promise.reject(refreshError);
       }
     }
@@ -236,9 +234,7 @@ auth.api.interceptors.response.use(
       if (error.response.status >= 500) {
         // 500번대 오류 처리
         console.error("API error:", error.message);
-        console.log("여기야1");
       } else if (error.response.status >= 400 && error.response.status < 500) {
-        console.log("여기야2");
         // 400번대 오류 처리
         alert(
           "Authorization Error" +
