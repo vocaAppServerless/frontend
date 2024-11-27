@@ -225,7 +225,7 @@ auth.api.interceptors.response.use(
       } catch (refreshError) {
         alert("Error refreshing token:" + JSON.stringify(refreshError));
         // Refresh 실패 시 로컬스토리지 및 상태 초기화
-        // localStorage.clear();
+        localStorage.clear();
         return Promise.reject(refreshError);
       }
     }
