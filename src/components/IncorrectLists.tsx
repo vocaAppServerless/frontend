@@ -2,15 +2,15 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { useFuncs } from "../funcs";
 
-const WordLists = () => {
+const IncorrectLists = () => {
   // const dispatch = useDispatch();
   const { userInfo } = useSelector((state: any) => state);
   const funcs = useFuncs();
 
   return (
     <div className="container_wordlists">
-      <h2>Word List Page</h2>
-      <p>{userInfo.email}</p>
+      <h2>Incorrect Word List Page</h2>
+      <p>{userInfo.picture}</p>
 
       <button
         onClick={() => {
@@ -23,4 +23,4 @@ const WordLists = () => {
   );
 };
 
-export default WordLists;
+export default IncorrectLists;

@@ -4,6 +4,7 @@ import { configureStore } from "@reduxjs/toolkit";
 const initialState = {
   mode: { loginButton: false },
   userInfo: null,
+  data: {},
 };
 
 const appReducer = (state = initialState, action: any) => {
@@ -18,6 +19,8 @@ const appReducer = (state = initialState, action: any) => {
           loginButton: action.value, // loginButton 값 업데이트
         },
       };
+    case "SET_DATA":
+      return { ...state, data: action.value };
     default:
       return state;
   }

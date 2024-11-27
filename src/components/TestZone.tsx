@@ -83,17 +83,8 @@ const TestZone: React.FC<TestZoneProps> = ({ endpoint }) => {
     test_oauth_middle_ware: async () => {
       if (endpoint) {
         try {
-          // 로컬 스토리지에서 email 가져오기
-          const email = localStorage.getItem("email");
-          if (!email) {
-            throw new Error("Email not found in storage");
-          }
-
-          // email을 URL에 인코딩하여 파라미터로 추가
-          const encodedEmail = encodeURIComponent(email);
-
           const response = await auth.api.get(
-            `${endpoint}/test?request=testAuthFlow&email=${encodedEmail}`
+            `${endpoint}/test?request=testAuthFlow`
           );
 
           alert(JSON.stringify(response.data));
@@ -101,7 +92,7 @@ const TestZone: React.FC<TestZoneProps> = ({ endpoint }) => {
           // error를 AxiosError 타입으로 지정하여 접근
           const axiosError = error as AxiosError;
           alert(
-            "Error connecting to DB: " +
+            "Error connecting to oauthMiddleware: " +
               JSON.stringify(axiosError.response?.data || axiosError.message)
           );
         }

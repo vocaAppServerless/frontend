@@ -125,6 +125,8 @@ export const auth = {
         localStorage.setItem("access_token", tokens.access_token);
         localStorage.setItem("refresh_token", tokens.refresh_token);
         localStorage.setItem("email", userInfo.email);
+        localStorage.setItem("picture", userInfo.picture);
+
         localStorage.removeItem("code_verifier");
         console.log(authResponse);
 
@@ -234,7 +236,9 @@ auth.api.interceptors.response.use(
       if (error.response.status >= 500) {
         // 500번대 오류 처리
         console.error("API error:", error.message);
+        console.log("여기야1");
       } else if (error.response.status >= 400 && error.response.status < 500) {
+        console.log("여기야2");
         // 400번대 오류 처리
         alert(
           "Authorization Error" +

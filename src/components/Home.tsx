@@ -5,6 +5,9 @@ import "./Home.scss";
 import { auth } from "../auth";
 import { useDispatch, useSelector } from "react-redux";
 
+//icons
+import { FaRegFaceFrownOpen } from "react-icons/fa6";
+
 type GoogleLoginButtonProps = {
   onClick: () => void;
 };
@@ -41,6 +44,7 @@ const Home = () => {
   return (
     <div className="container_home">
       <p>here is home!</p>
+      <FaRegFaceFrownOpen />
       <p>here is home!</p>
       <p>{JSON.stringify(state.userInfo)}</p>
 
