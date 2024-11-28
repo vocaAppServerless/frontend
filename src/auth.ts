@@ -226,6 +226,7 @@ auth.api.interceptors.response.use(
         alert("Error refreshing token:" + JSON.stringify(refreshError));
         // Refresh 실패 시 로컬스토리지 및 상태 초기화
         localStorage.clear();
+        window.location.href = "/";
         return Promise.reject(refreshError);
       }
     }
@@ -241,8 +242,10 @@ auth.api.interceptors.response.use(
             JSON.stringify(error.response?.data?.authResponse) ||
             "Unknown error"
         );
-        localStorage.clear();
-        window.location.href = "/";
+        if (window.location.pathname !== "/") {
+          localStorage.clear();
+          window.location.href = "/";
+        }
         return Promise.reject(error);
       }
     }

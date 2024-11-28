@@ -1,10 +1,7 @@
 import React from "react";
 import { auth } from "../auth";
 import { AxiosError } from "axios";
-
-interface TestZoneProps {
-  endpoint?: string;
-}
+import { staticData } from "../staticData";
 
 interface TestButtonProps {
   onClick: () => void;
@@ -28,7 +25,7 @@ const TestButton: React.FC<TestButtonProps> = ({
   </div>
 );
 
-const TestZone: React.FC<TestZoneProps> = ({ endpoint }) => {
+const TestZone: React.FC = () => {
   const test_funcs = {
     test_front_env: () => {
       const dog: string | undefined = process.env.REACT_APP_DOG;
@@ -36,14 +33,14 @@ const TestZone: React.FC<TestZoneProps> = ({ endpoint }) => {
     },
     test_front_env_api_gw_ep: () => {
       alert(
-        endpoint
+        staticData.endpoint
           ? "available to read endpoint."
           : "API Gateway endpoint environment variable is not set."
       );
     },
     test_connect_to_lambda: () => {
-      if (endpoint) {
-        fetch(`${endpoint}/test?request=connectLambda`)
+      if (staticData.endpoint) {
+        fetch(`${staticData.endpoint}/test?request=connectLambda`)
           .then((response) => {
             if (!response.ok) throw new Error("Network response was not ok");
             return response.json();
@@ -55,8 +52,8 @@ const TestZone: React.FC<TestZoneProps> = ({ endpoint }) => {
       }
     },
     test_read_server_env: () => {
-      if (endpoint) {
-        fetch(`${endpoint}/test?request=readServerEnv`)
+      if (staticData.endpoint) {
+        fetch(`${staticData.endpoint}/test?request=readServerEnv`)
           .then((response) => {
             if (!response.ok) throw new Error("Network response was not ok");
             return response.json();
@@ -68,8 +65,8 @@ const TestZone: React.FC<TestZoneProps> = ({ endpoint }) => {
       }
     },
     test_connect_to_db: () => {
-      if (endpoint) {
-        fetch(`${endpoint}/test?request=connectDb`)
+      if (staticData.endpoint) {
+        fetch(`${staticData.endpoint}/test?request=connectDb`)
           .then((response) => {
             if (!response.ok) throw new Error("Network response was not ok");
             return response.json();
@@ -81,14 +78,14 @@ const TestZone: React.FC<TestZoneProps> = ({ endpoint }) => {
       }
     },
     test_oauth_middle_ware: async () => {
-      if (endpoint) {
+      if (staticData.endpoint) {
         try {
           const response = await auth.api.get(
-            `${endpoint}/test?request=testAuthFlow`
+            `${staticData.endpoint}/test?request=testAuthFlow`
           );
 
-          // alert(JSON.stringify(response.data));
-          console.log(JSON.stringify(response?.data));
+          alert(JSON.stringify(response.data));
+          alert(response?.data.authResponse.message);
         } catch (error) {
           // error를 AxiosError 타입으로 지정하여 접근
           const axiosError = error as AxiosError;

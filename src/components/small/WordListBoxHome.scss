@@ -1,0 +1,167 @@
+.word-card {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 150px;
+  margin: 5px;
+  box-shadow: 0px 4px 20px rgba(255, 99, 71, 0.3); /* 투명도 0.3으로 설정 */
+
+  .word-card-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 1; /* 1줄로 제한 */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal; /* 텍스트가 자동으로 줄바꿈 되도록 설정 */
+  }
+
+  /* 모바일에서 표시할 스타일 */
+  @media (max-width: 768px) {
+    width: 100%; /* 모바일에서는 카드가 100% 너비를 차지하도록 */
+    margin: 10px 0; /* 상하 마진 조정 */
+
+    .word-card-body {
+      background-color: #fff;
+      padding: 5px;
+      display: flex;
+
+      .word-card-flag {
+        width: 90px;
+        height: 60px; /* 모바일에서는 flag의 높이를 낮추기 */
+        filter: blur(3px);
+        opacity: 0.8;
+        background-size: cover;
+        background-position: center;
+      }
+      .word-card-info {
+        display: flex;
+        width: 100%;
+        justify-content: space-around;
+        align-items: center;
+        padding-left: 5px;
+        .word-card-title {
+          width: 150px;
+          font-size: 1em;
+          font-weight: bold;
+          text-align: center;
+          color: #333;
+          margin-bottom: 0.5rem;
+          padding: 0;
+          margin: 0;
+        }
+
+        .word-card-date {
+          font-size: 0.7em;
+          text-align: center;
+          color: #666;
+          margin-bottom: 1rem;
+          padding: 0;
+          margin: 0;
+        }
+
+        .word-card-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+          .word-card-icons {
+            display: flex;
+            gap: 0.3rem;
+
+            .icon-sticky-note {
+              font-size: 1rem;
+              color: #aaa;
+            }
+          }
+
+          .icon-bookmark {
+            font-size: 1.5rem;
+            margin-left: 10px;
+
+            color: #ccc;
+
+            &.filled {
+              color: gold;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /* 데스크탑에서 표시할 스타일 */
+  @media (min-width: 769px) {
+    width: 300px; /* 데스크탑에서는 기존 크기 유지 */
+    margin: 5px;
+
+    .word-card-flag {
+      height: 120px;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .word-card-body {
+      background-color: #fff;
+      padding: 5px;
+
+      .word-card-flag {
+        height: 120px;
+        background-size: cover;
+        background-position: center;
+        filter: blur(3px);
+        opacity: 0.8;
+      }
+
+      .word-card-title {
+        font-size: 1em;
+        font-weight: bold;
+        text-align: center;
+        color: #333;
+        margin-bottom: 0.5rem;
+        padding: 0;
+        margin: 0;
+      }
+
+      .word-card-date {
+        font-size: 0.9rem;
+        text-align: center;
+        color: #666;
+        margin-bottom: 1rem;
+        padding: 0;
+        margin: 0;
+      }
+
+      .word-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .word-card-icons {
+          display: flex;
+          gap: 0.3rem;
+
+          .icon-sticky-note {
+            font-size: 1rem;
+            color: #aaa;
+          }
+        }
+
+        .icon-bookmark {
+          font-size: 1.5rem;
+          color: #ccc;
+
+          &.filled {
+            color: gold;
+          }
+        }
+      }
+    }
+  }
+
+  &:hover {
+    transform: scale(1.01);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+}
