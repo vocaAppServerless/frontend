@@ -8,7 +8,7 @@ import WordListBox from "./small/WordListBox";
 
 import { staticData } from "../staticData";
 import { AxiosError } from "axios";
-import { useFuncs } from "../funcs";
+// import { useFuncs } from "../funcs";
 
 //icons
 import { MdFavorite } from "react-icons/md";
@@ -35,7 +35,7 @@ const Home = () => {
   const lists = useSelector((state: any) => state?.data.lists);
   const isLoading = useSelector((state: any) => state.mode.isLoading);
 
-  const { showAlert } = useFuncs();
+  // const { showAlert } = useFuncs();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,10 +56,7 @@ const Home = () => {
             type: "SET_DATA_LISTS",
             value: response?.data.answer.lists, // lists 데이터만 추출하여 저장
           });
-        } else {
-          showAlert("please SignIn");
         }
-
         // 응답 데이터를 Redux에 저장
       } catch (error) {
         // error를 AxiosError 타입으로 지정하여 접근
