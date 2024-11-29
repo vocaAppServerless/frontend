@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaStar, FaRegStar, FaRegStickyNote } from "react-icons/fa";
-import "./WordListBoxHome.scss"; // SCSS 파일 import
+import "./WordListBox.scss"; // SCSS 파일 import
 
 interface WordListBoxProps {
   name: string;
@@ -10,7 +10,7 @@ interface WordListBoxProps {
   is_bookmark: boolean;
 }
 
-const WordListBoxHome: React.FC<WordListBoxProps> = ({
+const WordListBox: React.FC<WordListBoxProps> = ({
   name,
   creation_date,
   language,
@@ -50,7 +50,9 @@ const WordListBoxHome: React.FC<WordListBoxProps> = ({
           ></div>
           <div className="word-card-info">
             <h3 className="word-card-title">{name}</h3>
-            <p className="word-card-date">{creation_date}</p>
+            <p className="word-card-date">
+              {new Date(creation_date).toLocaleDateString("en-GB")}
+            </p>
             <div className="word-card-footer">
               <div className="word-card-icons">
                 {linked_incorrect_word_lists.map((_, index) => (
@@ -71,7 +73,9 @@ const WordListBoxHome: React.FC<WordListBoxProps> = ({
             style={{ backgroundImage: `url(${flagImage})` }}
           ></div>
           <h3 className="word-card-title">{name}</h3>
-          <p className="word-card-date">{creation_date}</p>
+          <p className="word-card-date">
+            {new Date(creation_date).toLocaleDateString()} {/* 날짜만 포맷팅 */}
+          </p>
           <div className="word-card-footer">
             <div className="word-card-icons">
               {linked_incorrect_word_lists.map((_, index) => (
@@ -88,4 +92,4 @@ const WordListBoxHome: React.FC<WordListBoxProps> = ({
   );
 };
 
-export default WordListBoxHome;
+export default WordListBox;

@@ -85,7 +85,6 @@ const TestZone: React.FC = () => {
           );
 
           alert(JSON.stringify(response.data));
-          alert(response?.data.authResponse.message);
         } catch (error) {
           // error를 AxiosError 타입으로 지정하여 접근
           const axiosError = error as AxiosError;

@@ -2,9 +2,17 @@
 import { configureStore } from "@reduxjs/toolkit";
 
 const initialState = {
-  mode: { isSign: false, isLoading: false },
+  mode: { isSign: false, isLoading: false, isAlert: false },
+  alertMessage: null,
   userInfo: null,
   data: {},
+  changedData: {
+    bookmarkedLists: [],
+    deletedLists: [],
+    editedLists: [],
+    deletedWords: [],
+    editedWords: [],
+  },
 };
 
 const appReducer = (state = initialState, action: any) => {
@@ -37,6 +45,19 @@ const appReducer = (state = initialState, action: any) => {
           ...state.mode,
           isLoading: action.value,
         },
+      };
+    case "SET_ALERT": // alert 상태를 업데이트하는 액션
+      return {
+        ...state,
+        mode: {
+          ...state.mode,
+          isAlert: action.value, // alert 상태 업데이트
+        },
+      };
+    case "SET_ALERT_MESSAGE": // alertMessage를 업데이트하는 액션
+      return {
+        ...state,
+        alertMessage: action.message, // alertMessage 상태 업데이트
       };
     default:
       return state;

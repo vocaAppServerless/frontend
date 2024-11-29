@@ -1,9 +1,8 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 export const useFuncs = () => {
   const dispatch = useDispatch();
-  const { userInfo } = useSelector((state: any) => state);
-  console.log(userInfo);
+
   return {
     changeUserInfo: (userInfo: any) => {
       console.log("change user info");
@@ -14,6 +13,16 @@ export const useFuncs = () => {
       dispatch({ type: "SET_USER", value: null });
       dispatch({ type: "SET_DATA", value: null });
       localStorage.clear();
+    },
+    showAlert: (message: string) => {
+      console.log("Dispatching SET_ALERT");
+      dispatch({ type: "SET_ALERT", value: true });
+      console.log("Dispatching SET_ALERT_MESSAGE");
+      dispatch({ type: "SET_ALERT_MESSAGE", message });
+      setTimeout(() => {
+        console.log("Hiding alert");
+        dispatch({ type: "SET_ALERT", value: false });
+      }, 3000);
     },
   };
 };

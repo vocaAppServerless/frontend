@@ -3,6 +3,10 @@ import "./App.scss";
 import { Provider } from "react-redux";
 import { store } from "./store";
 import { useDispatch, useSelector } from "react-redux";
+import { staticData } from "./staticData";
+import { AxiosError } from "axios";
+import { auth } from "./auth";
+
 // import { staticData } from "./staticData";
 
 // icons
@@ -21,15 +25,19 @@ import {
 
 import TestZone from "./components/TestZone";
 import Home from "./components/Home";
-import WordLists from "./components/WordLists";
+import Lists from "./components/Lists";
 import IncorrectLists from "./components/IncorrectLists";
 import ErrorBoundary from "./components/ErrorBoundary"; // 방금 만든 ErrorBoundary 컴포넌트
 import Auth from "./components/Auth"; // Auth.tsx 컴포넌트 임포트
+import AlertModal from "./components/small/AlertModal"; // AlertModal 임포트
+import Loading from "./components/small/Loading"; // 컴포넌트 import
 
 const AppContent = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const isSign = useSelector((state: any) => state.mode.isSign);
+  const isLoading = useSelector((state: any) => state.mode.isLoading);
+  const { mode, alertMessage } = useSelector((state: any) => state);
 
   const getNavItemClass = (path: string) => {
     return location.pathname === path ? "active" : "";
@@ -37,6 +45,43 @@ const AppContent = () => {
 
   // userInfo가 null 또는 undefined인 경우 대체값을 설정
   const userInfo = useSelector((state: any) => state.userInfo);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // 요청 시작 시 isLoading을 true로 설정
+      dispatch({
+        type: "SET_LOADING",
+        value: true,
+      });
+
+      try {
+        const response = await auth.api.get(
+          `${staticData.endpoint}/lists?request=getLists`
+        );
+
+        // 응답 데이터를 Redux에 저장
+        dispatch({
+          type: "SET_DATA_LISTS",
+          value: response.data.answer.lists, // lists 데이터만 추출하여 저장
+        });
+      } catch (error) {
+        // error를 AxiosError 타입으로 지정하여 접근
+        const axiosError = error as AxiosError;
+        alert(
+          "Error connecting to getLists: " +
+            JSON.stringify(axiosError.response?.data || axiosError.message)
+        );
+      } finally {
+        // 요청이 끝난 후 isLoading을 false로 설정
+        dispatch({
+          type: "SET_LOADING",
+          value: false,
+        });
+      }
+    };
+
+    fetchData(); // 비동기 요청 호출
+  }, [dispatch]);
 
   useEffect(() => {
     const handleRouteChange = () => {
@@ -68,6 +113,10 @@ const AppContent = () => {
   return (
     <div className="App">
       <div className="container_app">
+        <Loading isLoading={isLoading} />
+        {mode.isAlert && (
+          <AlertModal message={alertMessage} onClose={() => {}} />
+        )}
         <nav className="nav_top">
           <div className=" flex items-center text-white font-bold text-2xl sm:text-3xl lg:text-4xl">
             <MdOutlineEventNote className="mr-2" />
@@ -158,7 +207,7 @@ const AppContent = () => {
           <ErrorBoundary>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/wordlists" element={<WordLists />} />
+              <Route path="/wordlists" element={<Lists />} />
               <Route path="/incorrectlists" element={<IncorrectLists />} />
               <Route path="/auth" element={<Auth />} />
             </Routes>

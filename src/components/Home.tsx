@@ -1,13 +1,9 @@
 //Home
 
-import React, { useEffect } from "react";
 import "./Home.scss";
 import { auth } from "../auth";
-import { useDispatch, useSelector } from "react-redux";
-import WordListBoxHome from "./small/WordListBoxHome";
-import Loading from "./small/Loading"; // 컴포넌트 import
-import { staticData } from "../staticData";
-import { AxiosError } from "axios";
+import { useSelector } from "react-redux";
+import WordListBox from "./small/WordListBox";
 
 //icons
 import { MdFavorite } from "react-icons/md";
@@ -28,53 +24,12 @@ const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({ onClick }) => (
 );
 
 const Home = () => {
-  const dispatch = useDispatch();
   const state = useSelector((state: any) => state);
   const lists = useSelector((state: any) => state.data.lists);
   const isLoading = useSelector((state: any) => state.mode.isLoading);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      // 요청 시작 시 isLoading을 true로 설정
-      dispatch({
-        type: "SET_LOADING",
-        value: true,
-      });
-
-      try {
-        const response = await auth.api.get(
-          `${staticData.endpoint}/lists?request=getLists`
-        );
-        console.log(response); // 응답 전체 로그
-
-        // 응답 데이터를 Redux에 저장
-        dispatch({
-          type: "SET_DATA_LISTS",
-          value: response.data.answer.lists, // lists 데이터만 추출하여 저장
-        });
-      } catch (error) {
-        // error를 AxiosError 타입으로 지정하여 접근
-        const axiosError = error as AxiosError;
-        alert(
-          "Error connecting to getLists: " +
-            JSON.stringify(axiosError.response?.data || axiosError.message)
-        );
-      } finally {
-        // 요청이 끝난 후 isLoading을 false로 설정
-        dispatch({
-          type: "SET_LOADING",
-          value: false,
-        });
-      }
-    };
-
-    fetchData(); // 비동기 요청 호출
-  }, [dispatch]);
-
   return (
     <div className="container_home">
-      <Loading isLoading={isLoading} />
-
       {!state.mode.isSign && (
         <GoogleLoginButton
           onClick={() => {
@@ -82,7 +37,7 @@ const Home = () => {
           }}
         />
       )}
-      {!isLoading && (
+      {!isLoading && state.mode.isSign && (
         <div className="contents-home">
           <div className="title-box">
             <MdFavorite
@@ -95,9 +50,9 @@ const Home = () => {
           <div className="lists">
             {lists && lists.length > 0 ? (
               lists
-                .filter((list: any) => list.is_bookmark) // is_bookmark가 true인 항목만 필터링
+                .filter((list: any) => list.is_bookmark && !list.is_deleted) // is_bookmark가 true이고, is_deleted가 false인 항목만 필터링
                 .map((list: any) => (
-                  <WordListBoxHome
+                  <WordListBox
                     key={list._id} // 각 컴포넌트에 고유한 key 값 추가
                     name={list.name}
                     creation_date={list.creation_date}
@@ -109,9 +64,10 @@ const Home = () => {
                   />
                 ))
             ) : (
-              <p>No word lists available or processing is running.</p>
+              <p>No bookmarked word lists</p>
             )}
           </div>
+
           <div className="title-box p-2">
             <img
               className="lang-img bounce-top"
@@ -125,9 +81,11 @@ const Home = () => {
             {/* 영어 리스트 */}
             {lists && lists.length > 0 ? (
               lists
-                .filter((list: any) => list.language === "en") // 영어만 필터링
+                .filter(
+                  (list: any) => list.language === "en" && !list.is_deleted
+                ) // 영어만 필터링
                 .map((list: any) => (
-                  <WordListBoxHome
+                  <WordListBox
                     key={list._id}
                     name={list.name}
                     creation_date={list.creation_date}
@@ -139,7 +97,7 @@ const Home = () => {
                   />
                 ))
             ) : (
-              <p>No English word lists available or processing is running.</p>
+              <p>No English word lists.</p>
             )}
           </div>
           <div className="title-box">
@@ -155,9 +113,11 @@ const Home = () => {
             {/* 일본어 리스트 */}
             {lists && lists.length > 0 ? (
               lists
-                .filter((list: any) => list.language === "jp") // 일본어만 필터링
+                .filter(
+                  (list: any) => list.language === "jp" && !list.is_deleted
+                ) // 일본어만 필터링
                 .map((list: any) => (
-                  <WordListBoxHome
+                  <WordListBox
                     key={list._id}
                     name={list.name}
                     creation_date={list.creation_date}
@@ -169,7 +129,7 @@ const Home = () => {
                   />
                 ))
             ) : (
-              <p>No Japanese word lists available or processing is running.</p>
+              <p>No Japanese word lists</p>
             )}
           </div>
         </div>
