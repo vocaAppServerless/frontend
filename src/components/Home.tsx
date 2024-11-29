@@ -32,7 +32,7 @@ const Home = () => {
   const dispatch = useDispatch();
 
   const state = useSelector((state: any) => state);
-  const lists = useSelector((state: any) => state.data.lists);
+  const lists = useSelector((state: any) => state?.data.lists);
   const isLoading = useSelector((state: any) => state.mode.isLoading);
 
   const { showAlert } = useFuncs();
