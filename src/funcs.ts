@@ -1,3 +1,4 @@
+import { useCallback } from "react"; // useCallback 임포트
 import { useDispatch } from "react-redux";
 import { AxiosError } from "axios";
 import { auth } from "./auth";
@@ -27,8 +28,7 @@ export const useFuncs = () => {
         dispatch({ type: "SET_ALERT", value: false });
       }, 3000);
     },
-    fetchListsData: async () => {
-      // 요청 시작 시 isLoading을 true로 설정
+    fetchListsData: useCallback(async (): Promise<void> => {
       dispatch({
         type: "SET_LOADING",
         value: true,
@@ -42,7 +42,7 @@ export const useFuncs = () => {
         if (response?.data.answer.lists) {
           dispatch({
             type: "SET_DATA_LISTS",
-            value: response?.data.answer.lists, // lists 데이터만 추출하여 저장
+            value: response?.data.answer.lists,
           });
         }
       } catch (error) {
@@ -52,12 +52,11 @@ export const useFuncs = () => {
             JSON.stringify(axiosError.response?.data || axiosError.message)
         );
       } finally {
-        // 요청이 끝난 후 isLoading을 false로 설정
         dispatch({
           type: "SET_LOADING",
           value: false,
         });
       }
-    },
+    }, [dispatch]), // dispatch는 외부 의존성으로 넣어줍니다.
   };
 };

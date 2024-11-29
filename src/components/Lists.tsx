@@ -30,7 +30,7 @@ const Lists = () => {
     if (window.performance.navigation.type === 1) {
       fetchListsData();
     }
-  }, []); // 의존성 배열에 fetchData 추가
+  }, [fetchListsData]); // fetchListsData를 의존성 배열에 추가
 
   const toggleCreateModal = () => {
     setIsModalOpen(!isModalOpen);
