@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import WordListBox from "./small/WordListBox";
 import Loading from "./small/Loading"; // 컴포넌트 import
 import { useNavigate } from "react-router-dom"; // useNavigate import
+import { useFuncs } from "../funcs";
 
 import CreateListModal from "./small/CreateListModal"; // 새로운 모달 컴포넌트 import
 
@@ -16,6 +17,7 @@ const Lists = () => {
   const lists = useSelector((state: any) => state.data.lists);
   const isLoading = useSelector((state: any) => state.mode.isLoading);
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태 관리
+  const { fetchListsData } = useFuncs();
 
   useEffect(() => {
     if (lists === null) {
@@ -23,13 +25,19 @@ const Lists = () => {
     }
   }, [lists, navigate]); // lists가 변경될 때마다 실행
 
+  useEffect(() => {
+    // 새로 고침이 되었을 때만 fetchData 호출
+    if (window.performance.navigation.type === 1) {
+      fetchListsData();
+    }
+  }, []); // 의존성 배열에 fetchData 추가
+
   const toggleCreateModal = () => {
     setIsModalOpen(!isModalOpen);
   };
 
   return (
     <div className="container_lists">
-      <Loading isLoading={isLoading} />
       <CreateListModal isOpen={isModalOpen} closeModal={toggleCreateModal} />
 
       {!isLoading && state.mode.isSign && (
