@@ -93,6 +93,7 @@ const AppContent = () => {
               Remember me
             </p>
           </div>
+          <p>version 1.0.0</p>
 
           {userInfo && userInfo.email ? (
             <div className="flex items-center space-x-4 ml-auto">
