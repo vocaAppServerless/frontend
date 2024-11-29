@@ -44,9 +44,11 @@ const CreateListModal: React.FC<CreateListModalProps> = ({
             ...data, // 이름과 언어를 포함한 데이터
           }
         );
-
+        console.log("응답코드 : ", response);
+        console.log("응답코드 : ", response?.status);
+        console.log("응답데이터 : ", response?.data);
         // 응답 처리
-        if (response.status === 200 || response.status === 201) {
+        if (response?.status === 200 || response?.status === 201) {
           console.log("응답코드 : ", response.status);
           console.log("응답데이터 : ", response.data);
           // 받은 list 객체를 data.lists에 추가
