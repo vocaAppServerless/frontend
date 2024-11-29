@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import "./Lists.scss";
 import { useSelector } from "react-redux";
 import WordListBox from "./small/WordListBox";
-import Loading from "./small/Loading"; // 컴포넌트 import
 import { useNavigate } from "react-router-dom"; // useNavigate import
 import { useFuncs } from "../funcs";
 
