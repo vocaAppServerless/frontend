@@ -84,7 +84,7 @@ const TestZone: React.FC = () => {
             `${staticData.endpoint}/test?request=testAuthFlow`
           );
 
-          alert(JSON.stringify(response.data));
+          alert(JSON.stringify(response?.data));
         } catch (error) {
           // error를 AxiosError 타입으로 지정하여 접근
           const axiosError = error as AxiosError;

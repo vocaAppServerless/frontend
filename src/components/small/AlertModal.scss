@@ -28,6 +28,10 @@
     visibility: hidden;
     transition: opacity 0.5s ease, visibility 0.5s ease;
   }
+
+  &.hidden {
+    display: none; // alert 사라진 후 display: none 처리
+  }
 }
 
 .alert-modal {
@@ -64,4 +68,9 @@
   .alert-message {
     font-weight: bold;
   }
+}
+
+.alert-modal-overlay.hidden,
+.alert-modal.hidden {
+  display: none; // alert가 사라지면 display: none 적용
 }

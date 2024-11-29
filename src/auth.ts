@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from "axios";
+
 const api: string | undefined = process.env.REACT_APP_API_GATEWAY_ENDPOINT;
 
 //sign flow funcs
@@ -153,7 +154,21 @@ export const auth = {
 auth.api.interceptors.request.use(
   (config) => {
     const accessToken = localStorage.getItem("access_token");
+    const refreshToken = localStorage.getItem("refresh_token");
     const email = localStorage.getItem("email");
+
+    if (
+      (!accessToken || !email || !refreshToken) &&
+      (accessToken || email || refreshToken)
+    ) {
+      localStorage.clear(); // 로컬스토리지 모든 데이터 지우기
+      window.location.reload(); // 페이지 새로 고침
+      return Promise.reject(new Error("Auth data is missing"));
+    }
+
+    if (!accessToken && !email && !refreshToken) {
+      return Promise.reject(new Error("need sign"));
+    }
 
     if (accessToken) {
       config.headers["Access-Token"] = `Bearer ${accessToken}`;
@@ -171,6 +186,7 @@ auth.api.interceptors.request.use(
     return config;
   },
   (error) => {
+    console.log("durl");
     return Promise.reject(error);
   }
 );
@@ -225,8 +241,8 @@ auth.api.interceptors.response.use(
       } catch (refreshError) {
         alert("Error refreshing token:" + JSON.stringify(refreshError));
         // Refresh 실패 시 로컬스토리지 및 상태 초기화
-        localStorage.clear();
-        window.location.href = "/";
+        localStorage.clear(); // 로컬스토리지 모든 데이터 지우기
+        window.location.reload(); // 페이지 새로 고침
         return Promise.reject(refreshError);
       }
     }
@@ -242,10 +258,8 @@ auth.api.interceptors.response.use(
             JSON.stringify(error.response?.data?.authResponse) ||
             "Unknown error"
         );
-        if (window.location.pathname !== "/") {
-          localStorage.clear();
-          window.location.href = "/";
-        }
+        localStorage.clear(); // 로컬스토리지 모든 데이터 지우기
+        window.location.reload(); // 페이지 새로 고침
         return Promise.reject(error);
       }
     }

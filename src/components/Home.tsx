@@ -1,9 +1,14 @@
 //Home
+import React, { useEffect } from "react";
 
 import "./Home.scss";
 import { auth } from "../auth";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import WordListBox from "./small/WordListBox";
+
+import { staticData } from "../staticData";
+import { AxiosError } from "axios";
+import { useFuncs } from "../funcs";
 
 //icons
 import { MdFavorite } from "react-icons/md";
@@ -24,9 +29,55 @@ const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({ onClick }) => (
 );
 
 const Home = () => {
+  const dispatch = useDispatch();
+
   const state = useSelector((state: any) => state);
   const lists = useSelector((state: any) => state.data.lists);
   const isLoading = useSelector((state: any) => state.mode.isLoading);
+
+  const { showAlert } = useFuncs();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // 요청 시작 시 isLoading을 true로 설정
+      dispatch({
+        type: "SET_LOADING",
+        value: true,
+      });
+
+      try {
+        console.log(auth.api);
+        const response = await auth.api.get(
+          `${staticData.endpoint}/lists?request=getLists`
+        );
+
+        if (response?.data.answer.lists) {
+          dispatch({
+            type: "SET_DATA_LISTS",
+            value: response?.data.answer.lists, // lists 데이터만 추출하여 저장
+          });
+        } else {
+          showAlert("please SignIn");
+        }
+
+        // 응답 데이터를 Redux에 저장
+      } catch (error) {
+        // error를 AxiosError 타입으로 지정하여 접근
+        const axiosError = error as AxiosError;
+        alert(
+          "Error connecting to getLists: " +
+            JSON.stringify(axiosError.response?.data || axiosError.message)
+        );
+      } finally {
+        // 요청이 끝난 후 isLoading을 false로 설정
+        dispatch({
+          type: "SET_LOADING",
+          value: false,
+        });
+      }
+    };
+    fetchData(); // 비동기 요청 호출
+  }, [dispatch]);
 
   return (
     <div className="container_home">
