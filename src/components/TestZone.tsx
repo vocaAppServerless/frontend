@@ -1,14 +1,19 @@
+// public modules
 import React from "react";
-import { auth } from "../auth";
 import { AxiosError } from "axios";
+
+// custom
+import { auth } from "../auth";
 import { staticData } from "../staticData";
 
+// type
 interface TestButtonProps {
   onClick: () => void;
   title: string;
   description: string;
 }
 
+// simple components
 const TestButton: React.FC<TestButtonProps> = ({
   onClick,
   title,
@@ -26,6 +31,7 @@ const TestButton: React.FC<TestButtonProps> = ({
 );
 
 const TestZone: React.FC = () => {
+  // funcs
   const test_funcs = {
     test_front_env: () => {
       const dog: string | undefined = process.env.REACT_APP_DOG;
@@ -86,7 +92,6 @@ const TestZone: React.FC = () => {
 
           alert(JSON.stringify(response?.data));
         } catch (error) {
-          // error를 AxiosError 타입으로 지정하여 접근
           const axiosError = error as AxiosError;
           alert(
             "Error connecting to oauthMiddleware: " +
@@ -129,7 +134,7 @@ const TestZone: React.FC = () => {
         <TestButton
           onClick={test_funcs.test_oauth_middle_ware}
           title="인증 미들웨어 테스트"
-          description="인증 미들웨어 테스트 / 뭐가보일까?"
+          description="인증 미들웨어 테스트 / testdata가 보이면 성공!"
         />
       </div>
     </div>

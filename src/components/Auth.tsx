@@ -1,14 +1,21 @@
+// public modules
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+
+// custom
 import { auth } from "../auth";
 
 const Auth: React.FC = () => {
+  //default
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // useEffects
   useEffect(() => {
     const authenticateUser = async () => {
       try {
+        dispatch({ type: "SET_LOADING", value: true });
         const params = new URLSearchParams(window.location.search);
         const code = params.get("code");
 
@@ -19,8 +26,10 @@ const Auth: React.FC = () => {
         } else {
           navigate("/");
         }
+        dispatch({ type: "SET_LOADING", value: false });
       } catch (error: any) {
         alert("Authentication failed: " + error.message);
+        dispatch({ type: "SET_LOADING", value: false });
       }
     };
 

@@ -1,10 +1,16 @@
+// public modules
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
+// css
 import "./CreateListModal.scss";
+
+// custom
 import { useFuncs } from "../../funcs";
 import { auth } from "../../auth";
 import { staticData } from "../../staticData";
 
+// type
 interface CreateListModalProps {
   isOpen: boolean;
   closeModal: () => void;
@@ -14,20 +20,27 @@ const CreateListModal: React.FC<CreateListModalProps> = ({
   isOpen,
   closeModal,
 }) => {
-  const [language, setLanguage] = useState<string>("en");
-  const [listName, setListName] = useState<string>("");
-  const state = useSelector((state: any) => state);
+  //default
   const dispatch = useDispatch();
 
+  //public data
+  const lists = useSelector((state: any) => state?.data.lists);
+
+  //custom hook funcs
   const { showAlert } = useFuncs();
 
-  // 모달이 열릴 때마다 listName을 초기화
+  //component state
+  const [language, setLanguage] = useState<string>("en");
+  const [listName, setListName] = useState<string>("");
+
+  // useEffects
   useEffect(() => {
     if (isOpen) {
-      setListName(""); // 모달이 열릴 때마다 name을 리셋
+      setListName("");
     }
   }, [isOpen]);
 
+  // create handler
   const handleAddList = async () => {
     if (listName.trim() && language.trim()) {
       const data = {
@@ -37,46 +50,44 @@ const CreateListModal: React.FC<CreateListModalProps> = ({
       console.log(data);
 
       try {
-        // API 요청을 보내는 부분
+        dispatch({
+          type: "SET_LOADING",
+          value: true,
+        });
         const response = await auth.api.post(
-          `${staticData.endpoint}/list?request=putList`, // 경로는 적절하게 수정 가능
+          `${staticData.endpoint}/list?request=putList`,
           {
-            ...data, // 이름과 언어를 포함한 데이터
+            ...data,
           }
         );
-        console.log("응답코드 : ", response);
-        console.log("응답코드 : ", response?.status);
-        console.log("응답데이터 : ", response?.data);
-        // 응답 처리
-        if (response?.status === 200 || response?.status === 201) {
-          console.log("응답코드 : ", response.status);
-          console.log("응답데이터 : ", response.data);
-          // 받은 list 객체를 data.lists에 추가
-          const newList = response.data.answer.list;
-          // 기존 lists 배열 복사하고 새 list 추가
-          const updatedLists = [...state.data.lists, newList];
 
-          // 새로운 lists 배열로 SET_DATA_LISTS 액션 디스패치
+        if (response?.status === 200 || response?.status === 201) {
+          const newList = response.data.answer.list;
+          const updatedLists = [...lists, newList];
+
           dispatch({
             type: "SET_DATA_LISTS",
             value: updatedLists,
           });
+
           showAlert(`${listName} list is added!`);
           closeModal();
-        } else {
-          console.log("419에러도 여기서 잡아");
         }
       } catch (error) {
-        // 오류 처리
         console.error("create list API error:", error);
         showAlert("Something wrong..");
+      } finally {
+        dispatch({
+          type: "SET_LOADING",
+          value: false,
+        });
       }
     } else {
       showAlert("Write new list's name!");
     }
   };
 
-  // 모달이 열려있을 때만 표시
+  // etc
   if (!isOpen) return null;
 
   return (
@@ -99,6 +110,11 @@ const CreateListModal: React.FC<CreateListModalProps> = ({
             value={listName}
             onChange={(e) => setListName(e.target.value)}
             placeholder="Type the new list's name"
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                handleAddList();
+              }
+            }}
           />
 
           <label htmlFor="language">Language</label>
@@ -109,7 +125,6 @@ const CreateListModal: React.FC<CreateListModalProps> = ({
           >
             <option value="en">English</option>
             <option value="jp">Japanese</option>
-            {/* 다른 언어 옵션 추가 가능 */}
           </select>
         </div>
         <div className="create-list-modal-footer">

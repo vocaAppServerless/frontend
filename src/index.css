@@ -9,21 +9,19 @@
   --font-family-japanese: "Noto Sans JP", sans-serif;
 }
 
-/* 기본 폰트: 영어 */
+/* font */
 body {
   font-family: var(--font-family-english);
 }
 
-/* 한글일 때 적용할 폰트 */
 html[lang="ko"] body {
   font-family: var(--font-family-korean);
 }
 
-/* 일본어일 때 적용할 폰트 */
 html[lang="ja"] body {
   font-family: var(--font-family-japanese);
 }
-/* 기본 body 스타일 */
+
 body {
   margin: 0;
   font-family: var(--font-family-english);
@@ -37,14 +35,12 @@ code {
     monospace;
 }
 
-/* Tailwind에서 사용자 정의 컴포넌트 추가 */
+/* Tailwind components stype */
 @layer components {
-  /* 기본 버튼 */
   .btn {
     @apply px-4 py-2 rounded focus:outline-none;
   }
 
-  /* Primary 버튼 */
   .btn-primary {
     @apply bg-blue-500 text-white hover:bg-red-700 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
   }

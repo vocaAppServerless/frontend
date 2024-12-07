@@ -1,78 +1,302 @@
+// public modules
 import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+
+// css
 import "./Lists.scss";
-import { useSelector } from "react-redux";
-import WordListBox from "./small/WordListBox";
-import { useNavigate } from "react-router-dom"; // useNavigate import
+
+// custom
 import { useFuncs } from "../funcs";
+import { useQueue } from "../QueueContext";
+import { staticData } from "../staticData";
 
-import CreateListModal from "./small/CreateListModal"; // 새로운 모달 컴포넌트 import
+// components
+import CreateListModal from "./small/CreateListModal";
+import ListBox from "./small/ListBox";
 
-//icons
-import { FaPlus } from "react-icons/fa"; // FaPlus 아이콘 import
+// icons
+import { FaPlus } from "react-icons/fa";
+import { IoTrashBin } from "react-icons/io5";
+
+// type
+interface List {
+  _id: string;
+  name: string;
+  creation_date: string;
+  language: string;
+  linked_incorrect_word_lists: any[];
+  is_bookmark: boolean;
+  user_id: string;
+  is_deleted: boolean;
+}
 
 const Lists = () => {
-  const navigate = useNavigate(); // useNavigate 훅 사용
-  const state = useSelector((state: any) => state);
+  //default
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  //mode state
+  const isSign = useSelector((state: any) => state?.mode.isSign);
+  const isFetching = useSelector((state: any) => state.mode.isFetching);
+  const isMobile = useSelector((state: any) => state.mode.isMobile);
+
+  //public data
   const lists = useSelector((state: any) => state.data.lists);
-  const isLoading = useSelector((state: any) => state.mode.isLoading);
-  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태 관리
+  const { editedListsQueue } = useQueue();
+
+  //component state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedListIds, setselectedListIds] = useState<string[]>([]);
+
+  //custom hook funcs
   const { fetchListsData } = useFuncs();
 
-  useEffect(() => {
-    if (lists === null) {
-      navigate("/");
-    }
-  }, [lists, navigate]); // lists가 변경될 때마다 실행
+  //etc
+  let clickTimeout: NodeJS.Timeout | null = null;
 
   useEffect(() => {
-    // 새로 고침이 되었을 때만 fetchData 호출
-    if (window.performance.navigation.type === 1) {
-      fetchListsData();
+    const asyncHandler = async () => {
+      if (!lists || lists.length === 0) {
+        // 어레이가 빈값일경우
+        const fetchingResult = await fetchListsData();
+        console.log(1);
+        if (fetchingResult?.message === "success") {
+          // 2. 새로운 사용자일경우
+          console.log("fetching is succeed");
+          console.log(2);
+
+          return;
+        } else if (fetchingResult?.message === "processing") {
+          // 2. 이미 fetching중일경우
+          console.log(3);
+
+          console.log("fetching is processing");
+          return;
+        } else {
+          // 1. fetch가 안되었을경우
+          console.log(4);
+
+          console.log("fetching is on error");
+          navigate("/");
+        }
+      }
+    };
+    asyncHandler();
+  }, [fetchListsData, lists, navigate]);
+
+  // click handlers
+  const handleClick = (list_id: string) => {
+    if (clickTimeout) {
+      clearTimeout(clickTimeout);
     }
-  }, [fetchListsData]); // fetchListsData를 의존성 배열에 추가
+
+    clickTimeout = setTimeout(() => {
+      if (!clickTimeout) return;
+      console.log("Single Click");
+      navigate(`/lists/${list_id}`);
+    }, 200);
+  };
+
+  const handleDoubleClick = (list: List) => {
+    if (clickTimeout) {
+      clearTimeout(clickTimeout);
+    }
+
+    setselectedListIds((prev) => {
+      if (prev.includes(list._id)) {
+        return prev.filter((id) => id !== list._id);
+      }
+
+      if (prev.length >= staticData.max_list_queue_count) {
+        alert(`queue counts ${staticData.max_list_queue_count} is exceed`);
+        return prev;
+      }
+
+      return [...prev, list._id];
+    });
+
+    console.log("Double Click");
+  };
+
+  // buttons funcs
+  const deleteLists = () => {
+    if (!selectedListIds || selectedListIds.length === 0) {
+      console.log("there is not selected");
+      return;
+    }
+
+    const updatedLists = lists.map((list: List) => {
+      if (selectedListIds.includes(list._id)) {
+        return { ...list, is_deleted: true };
+      }
+      return list;
+    });
+
+    dispatch({
+      type: "SET_DATA_LISTS",
+      value: updatedLists,
+    });
+
+    setselectedListIds([]);
+
+    selectedListIds.forEach((id) => {
+      const listToDelete = lists.find((list: List) => list._id === id);
+      if (listToDelete) {
+        const updatedList = { ...listToDelete, is_deleted: true };
+        editedListsQueue.enqueue(updatedList);
+      } else {
+        console.log(`List with id ${id} not found`);
+      }
+    });
+  };
 
   const toggleCreateModal = () => {
     setIsModalOpen(!isModalOpen);
   };
 
-  return (
-    <div className="container_lists">
-      <CreateListModal isOpen={isModalOpen} closeModal={toggleCreateModal} />
+  // drag funcs
+  const handleDragStart = (start: any) => {
+    // 만약 드래그중인 데이터가 필요할경우 사용하세여
+    const draggedList = lists.find(
+      (list: List) => list._id === start.draggableId
+    );
+    console.log(draggedList);
+  };
 
-      {!isLoading && state.mode.isSign && (
+  const handleDragEnd = (result: any) => {
+    const { destination, source, draggableId } = result;
+    console.log("destination:", destination);
+
+    if (!destination) return;
+
+    if (destination.index === source.index) return;
+
+    const draggedItem = lists.find((list: List) => list._id === draggableId);
+
+    if (!draggedItem) {
+      console.error("List not found for the given draggableId");
+      return;
+    }
+
+    if (destination.droppableId === "wordLists") {
+      // is_deleted가 false인 항목만 필터링
+      const activeLists = lists.filter((list: List) => !list.is_deleted);
+
+      // activeLists에서만 재정렬
+      const reorderedLists = [...activeLists];
+
+      // 삭제된 항목을 빼고 순서 변경
+      const [removedItem] = reorderedLists.splice(source.index, 1); // 삭제
+      reorderedLists.splice(destination.index, 0, removedItem); // 삽입
+
+      console.log(
+        "Reordered Lists Names:",
+        reorderedLists.map((list: List) => list.name)
+      );
+
+      // 로컬스토리지에 업데이트된 순서 저장
+      const reorderedIds = reorderedLists.map((list: List) => list._id);
+
+      // 로컬스토리지에 순서 저장
+      localStorage.setItem("reorderedLists", JSON.stringify(reorderedIds));
+
+      // 디스패치하여 상태 업데이트
+      dispatch({ type: "SET_DATA_LISTS", value: reorderedLists });
+    }
+  };
+
+  return (
+    <div className={`container_lists ${isMobile ? "mobile" : "desktop"}`}>
+      <CreateListModal isOpen={isModalOpen} closeModal={toggleCreateModal} />
+      <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
         <div className="contents-lists">
-          <div className="lists">
-            {lists && lists.length > 0 ? (
-              lists
-                .filter((list: any) => !list.is_deleted) // is_deleted가 false인 항목만 필터링
-                .sort(
-                  (a: any, b: any) =>
-                    new Date(b.creation_date).getTime() -
-                    new Date(a.creation_date).getTime()
-                ) // 최신순으로 정렬
-                .map((list: any) => (
-                  <WordListBox
-                    key={list._id} // 각 컴포넌트에 고유한 key 값 추가
-                    name={list.name}
-                    creation_date={list.creation_date}
-                    language={list.language}
-                    linked_incorrect_word_lists={
-                      list.linked_incorrect_word_lists
-                    }
-                    is_bookmark={list.is_bookmark}
-                  />
-                ))
-            ) : (
-              <p>No word lists</p>
-            )}
+          {!isFetching && isSign && (
+            <Droppable droppableId="wordLists">
+              {(provided) => (
+                <div
+                  className="lists"
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    width: "100%",
+                    overflow: "auto",
+                  }}
+                >
+                  {lists && lists.length > 0 ? (
+                    lists
+                      .filter((list: List) => !list.is_deleted)
+                      .map((list: List, index: number) => (
+                        <Draggable
+                          key={list._id}
+                          draggableId={list._id}
+                          index={index}
+                        >
+                          {(provided) => (
+                            <div
+                              className="list-box-drag"
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              style={{
+                                ...provided.draggableProps.style,
+                                width: isMobile ? "90%" : "300px",
+                                margin: "3px",
+                              }}
+                            >
+                              <div
+                                className="list-box-select"
+                                style={{
+                                  margin: "1px",
+                                  borderRadius: "5px",
+                                  transform: selectedListIds.includes(list._id)
+                                    ? "scale(1.05)"
+                                    : "none",
+
+                                  transition: "transform 0.2s ease",
+                                }}
+                                onClick={() => handleClick(list._id)}
+                                onDoubleClick={() => handleDoubleClick(list)}
+                              >
+                                <ListBox
+                                  {...list}
+                                  isSelected={selectedListIds.includes(
+                                    list._id
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))
+                  ) : (
+                    <p>No word lists</p>
+                  )}
+
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          )}
+        </div>
+        <div className="btns">
+          <div className="btn" onClick={toggleCreateModal}>
+            <FaPlus className="icon" />
+          </div>
+
+          <div
+            className={`btn ${
+              selectedListIds.length > 0 ? "selectActive" : ""
+            }`}
+            onClick={deleteLists}
+          >
+            <IoTrashBin className="icon" />
           </div>
         </div>
-      )}
-      <div className="btns">
-        <div className="btn" onClick={toggleCreateModal}>
-          <FaPlus className="icon" />
-        </div>
-      </div>
+      </DragDropContext>
     </div>
   );
 };

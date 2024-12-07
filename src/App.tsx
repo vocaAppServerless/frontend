@@ -1,17 +1,7 @@
-import React, { useEffect } from "react";
-import "./App.scss";
+// public modules
+import React, { useEffect, useCallback } from "react";
 import { Provider } from "react-redux";
-import { store } from "./store";
 import { useDispatch, useSelector } from "react-redux";
-
-// import { staticData } from "./staticData";
-
-// icons
-import { IoIosLogOut, IoIosListBox } from "react-icons/io";
-import { MdOutlineEventNote } from "react-icons/md";
-import { FaList } from "react-icons/fa";
-import { AiOutlineHome } from "react-icons/ai";
-
 import {
   BrowserRouter as Router,
   Route,
@@ -20,71 +10,162 @@ import {
   useLocation,
 } from "react-router-dom";
 
-import TestZone from "./components/TestZone";
+// redux store
+import { store } from "./store";
+
+// css
+import "./App.scss";
+
+// custom
+import { useQueue } from "./QueueContext";
+import { QueueProvider } from "./QueueContext";
+
+// icons
+import { IoIosLogOut, IoIosListBox } from "react-icons/io";
+import { MdOutlineEventNote } from "react-icons/md";
+import { FaList } from "react-icons/fa";
+import { AiOutlineHome } from "react-icons/ai";
+
+// components
+// import TestZone from "./components/TestZone";
 import Home from "./components/Home";
 import Lists from "./components/Lists";
+import Words from "./components/Words";
 import IncorrectLists from "./components/IncorrectLists";
-import ErrorBoundary from "./components/ErrorBoundary"; // 방금 만든 ErrorBoundary 컴포넌트
-import Auth from "./components/Auth"; // Auth.tsx 컴포넌트 임포트
-import AlertModal from "./components/small/AlertModal"; // AlertModal 임포트
-import Loading from "./components/small/Loading"; // 컴포넌트 import
+import ErrorBoundary from "./components/ErrorBoundary";
+import Auth from "./components/Auth";
+import AlertModal from "./components/small/AlertModal";
+import Loading from "./components/small/Loading";
 
 const AppContent = () => {
+  // default
   const location = useLocation();
   const dispatch = useDispatch();
+
+  //mode state
   const isSign = useSelector((state: any) => state.mode.isSign);
   const isLoading = useSelector((state: any) => state.mode.isLoading);
-  const { mode, alertMessage } = useSelector((state: any) => state);
+  const isAlert = useSelector((state: any) => state.mode.isAlert);
+  const alertMessage = useSelector((state: any) => state.alertMessage);
+
+  // public data
+  const userInfo = useSelector((state: any) => state.userInfo);
+  const { editedListsQueue, editedWordsQueue } = useQueue();
+
+  //component state
+
+  // funcs
+  const handleSignOut = () => {
+    localStorage.clear();
+    dispatch({ type: "SET_USER_INFO", value: null });
+    dispatch({ type: "SET_DATA", value: {} });
+    window.location.reload();
+  };
+
+  const saveListsQueueDataAtDb = useCallback(async () => {
+    if (editedListsQueue.isEmpty()) {
+      return;
+    }
+
+    await editedListsQueue.forceTrigger();
+  }, [editedListsQueue]);
+
+  const saveWordsQueueDataAtDb = useCallback(async () => {
+    if (editedWordsQueue.isEmpty()) {
+      return;
+    }
+
+    await editedWordsQueue.forceTrigger();
+  }, [editedWordsQueue]);
 
   const getNavItemClass = (path: string) => {
     return location.pathname === path ? "active" : "";
   };
 
-  // userInfo가 null 또는 undefined인 경우 대체값을 설정
-  const userInfo = useSelector((state: any) => state.userInfo);
+  // basic handlers
+  window.addEventListener("beforeunload", (event) => {
+    if (
+      window.location.href.includes(
+        "https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount"
+      )
+    ) {
+      return;
+    }
+    saveListsQueueDataAtDb();
+    saveWordsQueueDataAtDb()
+      .then(() => {
+        event.preventDefault();
+      })
+      .catch((error) => {
+        console.error("Error saving data:", error);
+        event.preventDefault();
+      });
+  });
 
-  // auth 초기화가 완료되었는지 확인하는 함수
-
+  // useEffects
   useEffect(() => {
-    const handleRouteChange = () => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth <= 768;
+      dispatch({ type: "SET_MOBILE", value: isMobile });
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [dispatch]);
+
+  // router effect
+  useEffect(() => {
+    const handleRouteChange = async () => {
+      if (location.pathname === "/") {
+        console.log("Root path, skipping save.");
+        return; // 무한렌더링 방지
+      }
+
+      if (!editedListsQueue.isEmpty()) {
+        await saveListsQueueDataAtDb();
+      }
+      if (!editedWordsQueue.isEmpty()) {
+        await saveWordsQueueDataAtDb();
+      }
       console.log(`Current Path: ${location.pathname}`);
     };
-    handleRouteChange();
-  }, [location]);
 
+    handleRouteChange();
+  }, [
+    location,
+    editedListsQueue,
+    editedWordsQueue,
+    saveListsQueueDataAtDb,
+    saveWordsQueueDataAtDb,
+  ]);
+
+  // user Info effect
   useEffect(() => {
     const email = localStorage.getItem("email");
     const picture = localStorage.getItem("picture");
 
-    // email과 picture이 존재할 때만 상태를 업데이트
     if (email && picture) {
       const userInfo = { email, picture };
       dispatch({ type: "SET_USER_INFO", value: userInfo });
     }
   }, [dispatch]);
 
-  const handleSignOut = () => {
-    localStorage.clear();
-
-    dispatch({ type: "SET_USER_INFO", value: null });
-    dispatch({ type: "SET_DATA", value: {} });
-
-    window.location.reload();
-  };
-
   return (
     <div className="App">
       <div className="container_app">
         {isLoading && <Loading isLoading={isLoading} />}
 
-        {mode.isAlert && (
-          <AlertModal message={alertMessage} onClose={() => {}} />
-        )}
+        {isAlert && <AlertModal message={alertMessage} onClose={() => {}} />}
+
         <nav className="nav_top">
           <div className=" flex items-center text-white font-bold text-2xl sm:text-3xl lg:text-4xl">
             <MdOutlineEventNote className="mr-2" />
             <p
-              className="tracking-in-expand hidden sm:block " // 작은 화면에서 숨기고, sm 이상 크기에서 보이게
+              className="tracking-in-expand hidden sm:block "
               style={{
                 fontFamily: "kanit",
                 fontWeight: "bold",
@@ -93,8 +174,6 @@ const AppContent = () => {
               Remember me
             </p>
           </div>
-          <p>version 1.0.1</p>
-
           {userInfo && userInfo.email ? (
             <div className="flex items-center space-x-4 ml-auto">
               <img
@@ -103,7 +182,7 @@ const AppContent = () => {
                 alt="User Profile"
               />
               <div className="text-white font-semibold">
-                <p>{userInfo.email}</p> {/* 이메일을 출력 */}
+                <p>{userInfo.email}</p>
               </div>
               {!isSign ? null : (
                 <IoIosLogOut
@@ -114,7 +193,7 @@ const AppContent = () => {
             </div>
           ) : (
             <div className="text-white text-lg font-semibold ml-auto flex items-center space-x-2">
-              <p>로그인 하세여</p>
+              <p>please sign</p>
             </div>
           )}
         </nav>
@@ -127,8 +206,7 @@ const AppContent = () => {
           >
             <Link to="/" className="flex items-center space-x-2 bounce-top">
               <AiOutlineHome className="text-white text-2xl" />
-              <span className="text-white hidden sm:block">Home</span>{" "}
-              {/* 작은 화면에서는 숨기고, sm 이상에서는 보이게 */}
+              <span className="text-white hidden sm:block">Home</span>
             </Link>
           </div>
 
@@ -142,10 +220,7 @@ const AppContent = () => {
               className="flex items-center space-x-2 bounce-top"
             >
               <FaList className="text-white text-2xl" />
-              <span className="text-white hidden sm:block">
-                Word Lists
-              </span>{" "}
-              {/* 작은 화면에서는 숨기고, sm 이상에서는 보이게 */}
+              <span className="text-white hidden sm:block">Word Lists</span>
             </Link>
           </div>
 
@@ -161,8 +236,7 @@ const AppContent = () => {
               <IoIosListBox className="text-white text-2xl" />
               <span className="text-white hidden sm:block">
                 Incorrect Lists
-              </span>{" "}
-              {/* 작은 화면에서는 숨기고, sm 이상에서는 보이게 */}
+              </span>
             </Link>
           </div>
         </nav>
@@ -173,22 +247,27 @@ const AppContent = () => {
               <Route path="/" element={<Home />} />
               <Route path="/wordlists" element={<Lists />} />
               <Route path="/incorrectlists" element={<IncorrectLists />} />
+              <Route path="/lists/:id" element={<Words />} />
               <Route path="/auth" element={<Auth />} />
+              {/* <Route path="/incorectlists/:id" element={<IncorrectWords />} /> */}
             </Routes>
           </ErrorBoundary>
-          <TestZone />
+          {/* <TestZone /> */}
         </div>
       </div>
     </div>
   );
 };
 
+// App component
 function App() {
   return (
     <Provider store={store}>
-      <Router>
-        <AppContent />
-      </Router>
+      <QueueProvider>
+        <Router future={{ v7_startTransition: false }}>
+          <AppContent />
+        </Router>
+      </QueueProvider>
     </Provider>
   );
 }

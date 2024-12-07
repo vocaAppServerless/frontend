@@ -4,17 +4,65 @@
   flex-direction: column;
   justify-content: center;
 
-  .contents-lists {
-    position: relative;
-    border-radius: 15px;
-    width: 100%;
+  .lists {
+    padding: 10px;
+    width: 95%;
+    display: flex;
+    flex-wrap: wrap; /* 줄바꿈을 허용해 박스가 넘치지 않도록 */
+    justify-content: space-around; /* 아이템 간 간격 균등 분배 */
+    gap: 1px; /* 박스 간 간격 */
+    padding: 3px;
 
-    .lists {
-      padding: 10px;
+    .list-box-drag {
+      width: 95%;
+      padding: 5px;
+
+      .list-box-select {
+        width: 100%;
+        padding: 1px;
+      }
+    }
+  }
+
+  // 모바일 스타일
+  &.mobile {
+    flex-direction: column;
+
+    .btns {
       width: 100%;
+      z-index: 10;
+      position: fixed;
+      bottom: 60px; /* 모바일에서는 조금 더 위로 배치 */
+      height: 70px;
       display: flex;
-      justify-content: flex-start;
-      flex-wrap: wrap;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 20px;
+    }
+  }
+
+  // 데스크탑 스타일
+  &.desktop {
+    .contents-lists {
+      width: 100%;
+      .lists {
+        width: 100%;
+      }
+    }
+
+    .list-box-drag {
+      width: auth;
+    }
+    .btns {
+      width: 100%;
+      z-index: 10;
+      position: fixed;
+      bottom: 50px;
+      height: 90px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 20px;
     }
   }
 
@@ -25,9 +73,10 @@
     bottom: 50px;
     height: 90px;
     display: flex;
-    justify-content: center; // 버튼을 가운데에 위치시킴
+    justify-content: space-around; // 버튼을 가운데에 위치시킴
     align-items: center;
     padding: 0 20px;
+
     .btn {
       width: 60px; // 버튼의 크기
       height: 60px; // 버튼의 크기
@@ -83,6 +132,13 @@
 
       &:active {
         transform: scale(0.95); // 클릭 시 버튼 크기 약간 줄어듦
+      }
+    }
+
+    .selectActive {
+      transform: scale(1.2);
+      .icon {
+        color: white;
       }
     }
   }

@@ -1,29 +1,38 @@
 // store.ts
 import { configureStore } from "@reduxjs/toolkit";
 
+// initial data
 const initialState = {
-  mode: { isSign: false, isLoading: false, isAlert: false },
+  mode: {
+    isSign: false,
+    isLoading: false,
+    isAlert: false,
+    isFetching: false,
+    isMobile: false,
+  },
   alertMessage: null,
   userInfo: null,
-  data: {},
-  changedData: {
-    bookmarkedLists: [],
-    deletedLists: [],
-    editedLists: [],
-    deletedWords: [],
-    editedWords: [],
-  },
+  data: { lists: [], words: [] },
 };
 
+// reducer
 const appReducer = (state = initialState, action: any) => {
   switch (action.type) {
+    // set data
+
+    case "SET_DATA_LISTS":
+      return { ...state, data: { ...state.data, lists: action.value } };
+    case "SET_DATA_WORDS":
+      return { ...state, data: { ...state.data, words: action.value } };
+
+    // set auth
     case "SET_USER_INFO":
       return {
         ...state,
         userInfo: action.value,
         mode: {
           ...state.mode,
-          isSign: Boolean(action.value), // userInfo가 null이 아니면 true, null이면 false
+          isSign: Boolean(action.value),
         },
       };
     case "SET_SIGN":
@@ -31,14 +40,11 @@ const appReducer = (state = initialState, action: any) => {
         ...state,
         mode: {
           ...state.mode,
-          isSign: action.value, // loginButton 값 업데이트
+          isSign: action.value,
         },
       };
-    case "SET_DATA":
-      return { ...state, data: action.value };
-    case "SET_DATA_LISTS": // 리스트 데이터를 업데이트하는 액션
-      return { ...state, data: { ...state.data, lists: action.value } };
-    case "SET_LOADING": // isLoading 상태를 업데이트하는 액션
+    // set mode state
+    case "SET_LOADING":
       return {
         ...state,
         mode: {
@@ -46,19 +52,36 @@ const appReducer = (state = initialState, action: any) => {
           isLoading: action.value,
         },
       };
-    case "SET_ALERT": // alert 상태를 업데이트하는 액션
+    case "SET_FETCHING":
       return {
         ...state,
         mode: {
           ...state.mode,
-          isAlert: action.value, // alert 상태 업데이트
+          isFetching: action.value,
         },
       };
-    case "SET_ALERT_MESSAGE": // alertMessage를 업데이트하는 액션
+    case "SET_ALERT":
       return {
         ...state,
-        alertMessage: action.message, // alertMessage 상태 업데이트
+        mode: {
+          ...state.mode,
+          isAlert: action.value,
+        },
       };
+    case "SET_ALERT_MESSAGE":
+      return {
+        ...state,
+        alertMessage: action.message,
+      };
+    case "SET_MOBILE":
+      return {
+        ...state,
+        mode: {
+          ...state.mode,
+          isMobile: action.value,
+        },
+      };
+
     default:
       return state;
   }

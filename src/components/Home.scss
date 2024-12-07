@@ -102,6 +102,43 @@
       font-weight: 500;
     }
   }
+
+  &.mobile {
+    .contents-home {
+      padding: 10px;
+
+      .title-box {
+        flex-direction: row; // 모바일에서는 세로 정렬
+        padding: 0.5rem;
+        .lang-img {
+          width: 40px;
+          height: 40px;
+        }
+        .title-lang,
+        .title-favorite {
+          font-size: 1.25rem; // 글자 크기 축소
+        }
+      }
+    }
+  }
+
+  &.desktop {
+    .contents-home {
+      padding: 20px;
+
+      .title-box {
+        flex-direction: row; // 데스크톱에서는 가로 정렬
+        .lang-img {
+          width: 50px;
+          height: 50px;
+        }
+        .title-lang,
+        .title-favorite {
+          font-size: 1.875rem; // 글자 크기 확대
+        }
+      }
+    }
+  }
 }
 
 .tracking-in-expand {

@@ -1,9 +1,10 @@
+// public modules
 import axios, { AxiosResponse } from "axios";
 
+// static data
 const api: string | undefined = process.env.REACT_APP_API_GATEWAY_ENDPOINT;
 
-//sign flow funcs
-
+// type
 interface ClientData {
   clientId: string;
   redirectUri: string;
@@ -26,7 +27,7 @@ interface SignResponse {
   tokens: Tokens;
 }
 
-// auth 객체
+// sign flow funcs
 export const auth = {
   // Code verifier 생성
   createCodeVerifier: (): string => {
@@ -73,7 +74,7 @@ export const auth = {
   joinGoogleOauthUrl: async (): Promise<void> => {
     try {
       const codeVerifier: string = auth.createCodeVerifier();
-      localStorage.setItem("code_verifier", codeVerifier); // 로컬스토리지에 저장
+      localStorage.setItem("code_verifier", codeVerifier);
 
       const codeChallenge: string = await auth.createCodeChallenge(
         codeVerifier
@@ -141,7 +142,7 @@ export const auth = {
   },
   api: axios.create({
     baseURL: api,
-    timeout: 5000, // 요청 타임아웃
+    timeout: 10000,
     headers: {
       "Content-Type": "application/json",
     },
@@ -150,7 +151,7 @@ export const auth = {
 
 //------------------- interceptors ----------------------
 
-// Request 인터셉터: 모든 요청에 access_token을 헤더에 추가
+// Request interceptor
 auth.api.interceptors.request.use(
   (config) => {
     const accessToken = localStorage.getItem("access_token");
@@ -161,8 +162,8 @@ auth.api.interceptors.request.use(
       (!accessToken || !email || !refreshToken) &&
       (accessToken || email || refreshToken)
     ) {
-      localStorage.clear(); // 로컬스토리지 모든 데이터 지우기
-      window.location.reload(); // 페이지 새로 고침
+      localStorage.clear();
+      window.location.reload();
       return Promise.reject(new Error("Auth data is missing"));
     }
 
@@ -178,8 +179,8 @@ auth.api.interceptors.request.use(
     if (email) {
       const encodedEmail = encodeURIComponent(email);
       config.params = {
-        ...(config.params || {}), // 기존 파라미터 유지
-        email: encodedEmail, // email 추가
+        ...(config.params || {}),
+        email: encodedEmail,
       };
     }
 
@@ -190,20 +191,13 @@ auth.api.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-// Response 인터셉터
+
+// Response interceptor
 auth.api.interceptors.response.use(
   (response) => {
-    // 응답 코드 200번이고 authResponse가 success authorization인 경우
-    if (
-      // response.status === 200 &&
-      response.data.authResponse === "success authorization"
-    ) {
-      // 로직 처리 (데이터 반환)
+    if (response.data.authResponse === "success authorization") {
       return response;
-    } else if (
-      // response.status === 201 &&
-      response.data.authResponse?.message === "here is new tokens"
-    ) {
+    } else if (response.data.authResponse?.message === "here is new tokens") {
       const access_token = response.data.authResponse.tokens.access_token;
       localStorage.setItem("access_token", access_token);
       return response;
@@ -214,7 +208,6 @@ auth.api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // 응답 코드 419번, authResponse가 expired access token인 경우
     if (
       error.response?.status === 419 &&
       error.response?.data.authResponse === "expired access token"
@@ -227,39 +220,33 @@ auth.api.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      // refresh token을 헤더에 담아 새로 요청
       try {
-        // 기존 요청의 데이터를 유지하며 refresh token만 헤더에 추가
         delete originalRequest.headers["Access-Token"];
         originalRequest.headers["Refresh-Token"] = `Bearer ${refreshToken}`;
         originalRequest.headers["Content-Type"] = "application/json";
 
-        // 기존 요청을 그대로 재시도
         const response = await auth.api(originalRequest);
-        // return response.data;
+        console.log(response?.data);
         return response;
       } catch (refreshError) {
         alert("Error refreshing token:" + JSON.stringify(refreshError));
-        // Refresh 실패 시 로컬스토리지 및 상태 초기화
-        localStorage.clear(); // 로컬스토리지 모든 데이터 지우기
-        window.location.reload(); // 페이지 새로 고침
+        localStorage.clear();
+        window.location.reload();
         return Promise.reject(refreshError);
       }
     }
 
     if (error.response) {
       if (error.response.status >= 500) {
-        // 500번대 오류 처리
         console.error("API error:", error.message);
       } else if (error.response.status >= 400 && error.response.status < 500) {
-        // 400번대 오류 처리
         alert(
           "Authorization Error" +
             JSON.stringify(error.response?.data?.authResponse) ||
             "Unknown error"
         );
-        localStorage.clear(); // 로컬스토리지 모든 데이터 지우기
-        window.location.reload(); // 페이지 새로 고침
+        localStorage.clear();
+        window.location.reload();
         return Promise.reject(error);
       }
     }
