@@ -1,5 +1,6 @@
 // public modules
 import axios, { AxiosResponse } from "axios";
+import CryptoJS from "crypto-js";
 
 // static data
 const api: string | undefined = process.env.REACT_APP_API_GATEWAY_ENDPOINT;
@@ -35,22 +36,16 @@ export const auth = {
     return randomString;
   },
 
-  // Code challenge 생성
-  createCodeChallenge: (codeVerifier: string): Promise<string> => {
-    return crypto.subtle
-      .digest("SHA-256", new TextEncoder().encode(codeVerifier))
-      .then((hash: ArrayBuffer) => {
-        const base64String: string = btoa(
-          Array.from(new Uint8Array(hash))
-            .map((byte: number) => String.fromCharCode(byte))
-            .join("")
-        )
-          .replace(/\+/g, "-")
-          .replace(/\//g, "_")
-          .replace(/=+$/, "");
+  createCodeChallenge: (codeVerifier: string): string => {
+    const hash = CryptoJS.SHA256(codeVerifier);
 
-        return base64String;
-      });
+    const base64String = hash
+      .toString(CryptoJS.enc.Base64)
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+    console.log(base64String);
+    return base64String;
   },
 
   // Client ID와 Redirect URI를 백엔드에서 가져오기
@@ -97,6 +92,7 @@ export const auth = {
 
       window.location.href = googleOauthUrl;
     } catch (error) {
+      alert(error);
       console.error("Error during Google OAuth URL creation:", error);
       throw error;
     }
@@ -154,30 +150,32 @@ export const auth = {
 // Request interceptor
 auth.api.interceptors.request.use(
   (config) => {
-    const accessToken = localStorage.getItem("access_token");
-    const refreshToken = localStorage.getItem("refresh_token");
-    const email = localStorage.getItem("email");
+    const authData = {
+      accessToken: localStorage.getItem("access_token"),
+      email: localStorage.getItem("email"),
+      refreshToken: localStorage.getItem("refresh_token"),
+    };
 
-    if (
-      (!accessToken || !email || !refreshToken) &&
-      (accessToken || email || refreshToken)
-    ) {
+    const hasMissingData = Object.values(authData).some((value) => !value);
+    const hasAnyData = Object.values(authData).some((value) => value);
+
+    if (hasMissingData && hasAnyData) {
       localStorage.clear();
       window.location.reload();
       return Promise.reject(new Error("Auth data is missing"));
     }
 
-    if (!accessToken && !email && !refreshToken) {
+    if (!hasAnyData) {
       return Promise.reject(new Error("need sign"));
     }
 
-    if (accessToken) {
-      config.headers["Access-Token"] = `Bearer ${accessToken}`;
+    if (authData.accessToken) {
+      config.headers["Access-Token"] = `Bearer ${authData.accessToken}`;
       config.headers["Content-Type"] = "application/json";
     }
 
-    if (email) {
-      const encodedEmail = encodeURIComponent(email);
+    if (authData.email) {
+      const encodedEmail = encodeURIComponent(authData.email);
       config.params = {
         ...(config.params || {}),
         email: encodedEmail,
@@ -187,7 +185,7 @@ auth.api.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.log("durl");
+    console.log("there is error on auth request interceptor");
     return Promise.reject(error);
   }
 );
@@ -221,7 +219,7 @@ auth.api.interceptors.response.use(
       }
 
       try {
-        delete originalRequest.headers["Access-Token"];
+        // delete originalRequest.headers["Access-Token"]; // 이걸 지워서 기존 access token다시보냄.
         originalRequest.headers["Refresh-Token"] = `Bearer ${refreshToken}`;
         originalRequest.headers["Content-Type"] = "application/json";
 

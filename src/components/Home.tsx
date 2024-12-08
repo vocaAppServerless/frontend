@@ -85,6 +85,7 @@ const Home = () => {
       dispatch({ type: "SET_LOADING", value: true });
       await auth.joinGoogleOauthUrl();
     } catch (error) {
+      console.log(error);
       console.error("Error during Google OAuth:", error);
       showAlert("something wrong..");
     } finally {

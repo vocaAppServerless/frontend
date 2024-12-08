@@ -96,7 +96,7 @@ const Lists = () => {
       if (!clickTimeout) return;
       console.log("Single Click");
       navigate(`/lists/${list_id}`);
-    }, 200);
+    }, 500);
   };
 
   const handleDoubleClick = (list: List) => {

@@ -248,7 +248,7 @@ const WordBox: React.FC<WordProps> = ({
         </div>
       </div>
       <div className="side-content">
-        {!isIncorrectList && !is_incorrect && (
+        {incorrectList_id && !isIncorrectList && !is_incorrect && (
           <button
             className="add-incorrect incorrect-btn"
             onClick={handleAddWordInIncorrectList}
@@ -258,7 +258,7 @@ const WordBox: React.FC<WordProps> = ({
           </button>
         )}
 
-        {is_incorrect && (
+        {incorrectList_id && is_incorrect && (
           <button
             className="substract-incorrect incorrect-btn"
             onClick={handleSubtractWordInFromcorrectList}

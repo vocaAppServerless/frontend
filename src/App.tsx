@@ -193,7 +193,7 @@ const AppContent = () => {
             </div>
           ) : (
             <div className="text-white text-lg font-semibold ml-auto flex items-center space-x-2">
-              <p>please sign</p>
+              <p>&nbsp;&nbsp;&nbsp;</p>
             </div>
           )}
         </nav>
